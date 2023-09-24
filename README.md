@@ -1,4 +1,4 @@
-# AF-Group-Project-2022
+# AF-Group-Project-2022 - Auth Setup
 
 > Research-Project-Management-System
 
