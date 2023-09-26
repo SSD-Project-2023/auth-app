@@ -24,10 +24,14 @@ function ResearchTopics() {
 
   useEffect(() => {
     (async () =>
-      await axios.get(`${BACKEND_BASE_URL}/research-topic/`).then((res) => {
-        setData(res?.data.filter((el) => el?.status === "PENDING"));
-        setLoading(false);
-      }))();
+      await axios
+        .get(`${BACKEND_BASE_URL}/research-topic/`, {
+          headers: { Authorization: localStorage.getItem("authToken") },
+        })
+        .then((res) => {
+          setData(res?.data.filter((el) => el?.status === "PENDING"));
+          setLoading(false);
+        }))();
   }, []);
 
   const markType = async (value, type) => {
@@ -44,11 +48,17 @@ function ResearchTopics() {
       status = "REJECTED";
     }
     await axios
-      .put(`${BACKEND_BASE_URL}/research-topic/acceptOrReject/${value?._id}`, {
-        status,
-        acceptOrRejectBy,
-        lastModified,
-      })
+      .put(
+        `${BACKEND_BASE_URL}/research-topic/acceptOrReject/${value?._id}`,
+        {
+          status,
+          acceptOrRejectBy,
+          lastModified,
+        },
+        {
+          headers: { Authorization: localStorage.getItem("authToken") },
+        }
+      )
       .then(() => {
         if (type === "accept") {
           notification.info({
@@ -72,10 +82,15 @@ function ResearchTopics() {
         status,
         email,
         supervisor,
+      },
+      {
+        headers: { Authorization: localStorage.getItem("authToken") },
       }
     );
     await axios
-      .get(`${BACKEND_BASE_URL}/research-topic/`)
+      .get(`${BACKEND_BASE_URL}/research-topic/`, {
+        headers: { Authorization: localStorage.getItem("authToken") },
+      })
       .then((res) => {
         setData(res?.data.filter((el) => el?.status === "PENDING"));
         setVisible(false);
@@ -115,7 +130,9 @@ function ResearchTopics() {
         .catch((error) => alert(error));
     else
       await axios
-        .get(`${BACKEND_BASE_URL}/research-topic`)
+        .get(`${BACKEND_BASE_URL}/research-topic`, {
+          headers: { Authorization: localStorage.getItem("authToken") },
+        })
         .then((res) => {
           setData(res?.data.filter((el) => el?.status === "PENDING"));
           setLoading(false);

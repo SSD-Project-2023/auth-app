@@ -17,15 +17,19 @@ export default class Home extends Component {
   }
 
   retrivePosts() {
-    axios.get(`${BACKEND_BASE_URL}/submit-presentation`).then((res) => {
-      console.log(res.data);
-      if (res.data) {
-        this.setState({
-          posts: res.data,
-        });
-      }
-      console.log(this.state.posts);
-    });
+    axios
+      .get(`${BACKEND_BASE_URL}/submit-presentation`, {
+        headers: { Authorization: localStorage.getItem("authToken") },
+      })
+      .then((res) => {
+        console.log(res.data);
+        if (res.data) {
+          this.setState({
+            posts: res.data,
+          });
+        }
+        console.log(this.state.posts);
+      });
   }
 
   render() {

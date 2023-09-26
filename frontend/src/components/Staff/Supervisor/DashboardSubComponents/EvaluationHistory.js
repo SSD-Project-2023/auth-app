@@ -64,7 +64,9 @@ const EvaluationHistory = () => {
   useEffect(() => {
     (async () =>
       await axios
-        .get(`${BACKEND_BASE_URL}/evaluation-history/getHistory`)
+        .get(`${BACKEND_BASE_URL}/evaluation-history/getHistory`, {
+          headers: { Authorization: localStorage.getItem("authToken") },
+        })
         .then((res) => {
           setData(res?.data);
           setLoading(false);

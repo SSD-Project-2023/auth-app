@@ -19,10 +19,14 @@ const ViewUsers = () => {
 
   useEffect(() => {
     (async () => {
-      await axios.get(`${BACKEND_BASE_URL}/api/auth/`).then((res) => {
-        setData(res.data);
-        setLoading(true);
-      });
+      await axios
+        .get(`${BACKEND_BASE_URL}/api/auth/`, {
+          headers: { Authorization: localStorage.getItem("authToken") },
+        })
+        .then((res) => {
+          setData(res.data);
+          setLoading(true);
+        });
     })();
   });
 
@@ -36,7 +40,9 @@ const ViewUsers = () => {
 
   const deleteHandler = async (id) => {
     try {
-      await axios.delete(`${BACKEND_BASE_URL}/api/auth/delete/${id}`);
+      await axios.delete(`${BACKEND_BASE_URL}/api/auth/delete/${id}`, {
+        headers: { Authorization: localStorage.getItem("authToken") },
+      });
       notification.info({
         message: `Notification`,
         description: "Successfully Deleted User 😘",

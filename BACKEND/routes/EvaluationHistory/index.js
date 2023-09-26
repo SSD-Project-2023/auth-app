@@ -5,9 +5,12 @@ const {
   getHistory,
   notifyStudentBySupervisor,
 } = require("../../controllers/EvaluationHistory");
+const { eventMiddleware } = require("../../utils/eventMiddleware");
 
-router.route("/create").post(createHistory);
-router.route("/getHistory").get(getHistory);
-router.route("/notifyStudentBySupervisor").post(notifyStudentBySupervisor);
+router.route("/create").post(eventMiddleware, createHistory);
+router.route("/getHistory").get(eventMiddleware, getHistory);
+router
+  .route("/notifyStudentBySupervisor")
+  .post(eventMiddleware, notifyStudentBySupervisor);
 
 module.exports = router;

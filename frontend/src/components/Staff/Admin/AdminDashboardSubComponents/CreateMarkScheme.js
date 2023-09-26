@@ -58,6 +58,7 @@ const CreateMarkScheme = () => {
       //headers
       headers: {
         "Content-Type": "application/json",
+        Authorization: localStorage.getItem("authToken"),
       },
     };
 
@@ -66,7 +67,7 @@ const CreateMarkScheme = () => {
     formData.append("desc", desc);
     formData.append("steps", steps);
     formData.append("totalMarks", totalMarks);
-    
+
     try {
       await axios.post(
         //use axios API

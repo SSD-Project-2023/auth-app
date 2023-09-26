@@ -137,7 +137,9 @@ const ChatWithGroups = () => {
   useEffect(() => {
     (async () =>
       await axios
-        .get(`${BACKEND_BASE_URL}/student-group/getGroups`)
+        .get(`${BACKEND_BASE_URL}/student-group/getGroups`, {
+          headers: { Authorization: localStorage.getItem("authToken") },
+        })
         .then((res) => {
           setData(res?.data);
           setLoading(false);

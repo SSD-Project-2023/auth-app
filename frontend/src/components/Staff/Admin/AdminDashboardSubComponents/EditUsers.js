@@ -48,17 +48,21 @@ const EditUsers = () => {
 
   useEffect(() => {
     (async () =>
-      await axios.get(`${BACKEND_BASE_URL}/api/auth/get/${id}`).then((res) => {
-        form.setFieldsValue({
-          username: res?.data?.username,
-          email: res?.data?.email,
-          type: res?.data?.type,
-        });
-        setUserName(res?.data?.username);
-        setEmail(res?.data?.email);
-        setType(res?.data?.type);
-        setLoader(!loader);
-      }))();
+      await axios
+        .get(`${BACKEND_BASE_URL}/api/auth/get/${id}`, {
+          headers: { Authorization: localStorage.getItem("authToken") },
+        })
+        .then((res) => {
+          form.setFieldsValue({
+            username: res?.data?.username,
+            email: res?.data?.email,
+            type: res?.data?.type,
+          });
+          setUserName(res?.data?.username);
+          setEmail(res?.data?.email);
+          setType(res?.data?.type);
+          setLoader(!loader);
+        }))();
   }, []);
 
   const updateUserHandler = async (placement) => {

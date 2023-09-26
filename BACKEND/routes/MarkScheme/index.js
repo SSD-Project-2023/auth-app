@@ -4,9 +4,10 @@ const {
   getSchemes,
   getScheme,
 } = require("../../controllers/MarkScheme");
+const { eventMiddleware } = require("../../utils/eventMiddleware");
 
-router.route("/create").post(createScheme);
-router.route("/").get(getSchemes);
-router.route("/get/:id").get(getScheme);
+router.route("/create").post(eventMiddleware, createScheme);
+router.route("/").get(eventMiddleware, getSchemes);
+router.route("/get/:id").get(eventMiddleware, getScheme);
 
 module.exports = router;
