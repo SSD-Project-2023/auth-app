@@ -31,7 +31,9 @@ let StudentGroup = () => {
       member4_Email,
     };
     axios
-      .post(`${BACKEND_BASE_URL}/student-group/create`, newStudentGroup)
+      .post(`${BACKEND_BASE_URL}/student-group/create`, newStudentGroup, {
+        headers: { Authorization: localStorage.getItem("authToken") },
+      })
       .then(() => {
         toast.success("New Student Group Added");
       })

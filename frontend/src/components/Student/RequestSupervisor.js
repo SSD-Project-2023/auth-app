@@ -30,7 +30,13 @@ const RequestSupervisor = () => {
       attachment,
     };
     axios
-      .post(`${BACKEND_BASE_URL}/research-topic/register`, newRequestSupervisor)
+      .post(
+        `${BACKEND_BASE_URL}/research-topic/register`,
+        newRequestSupervisor,
+        {
+          headers: { Authorization: localStorage.getItem("authToken") },
+        }
+      )
       .then(() => {
         toast.success("Request has been Send");
       })

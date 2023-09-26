@@ -36,12 +36,17 @@ const App = () => {
   useEffect(() => {
     (async () =>
       await axios
-        .get(`${BACKEND_BASE_URL}/student-group/getGroup/${groupName}`)
+        .get(`${BACKEND_BASE_URL}/student-group/getGroup/${groupName}`, {
+          headers: { Authorization: localStorage.getItem("authToken") },
+        })
         .then(async (res) => {
           setData(res?.data);
           await axios
             .get(
-              `${BACKEND_BASE_URL}/research-topic/checkTopic/${res?.data?.member1_Email}/${res?.data?.member2_Email}/${res?.data?.member3_Email}/${res?.data?.member4_Email}`
+              `${BACKEND_BASE_URL}/research-topic/checkTopic/${res?.data?.member1_Email}/${res?.data?.member2_Email}/${res?.data?.member3_Email}/${res?.data?.member4_Email}`,
+              {
+                headers: { Authorization: localStorage.getItem("authToken") },
+              }
             )
             .then((res) => {
               setResearch(res?.data);
@@ -57,12 +62,18 @@ const App = () => {
 
   const commentHandler = async () => {
     await axios
-      .post(`${BACKEND_BASE_URL}/chat/create`, {
-        comment,
-        commentedBy: localStorage.getItem("email"),
-        groupName,
-        date: new Date(),
-      })
+      .post(
+        `${BACKEND_BASE_URL}/chat/create`,
+        {
+          comment,
+          commentedBy: localStorage.getItem("email"),
+          groupName,
+          date: new Date(),
+        },
+        {
+          headers: { Authorization: localStorage.getItem("authToken") },
+        }
+      )
       .then(() => {
         notification.info({
           message: `You are successfully commented.`,
@@ -88,9 +99,15 @@ const App = () => {
   const handleEdit = async (id) => {
     if (comment) {
       await axios
-        .put(`${BACKEND_BASE_URL}/chat/updateCommentById/${id}`, {
-          comment,
-        })
+        .put(
+          `${BACKEND_BASE_URL}/chat/updateCommentById/${id}`,
+          {
+            comment,
+          },
+          {
+            headers: { Authorization: localStorage.getItem("authToken") },
+          }
+        )
         .then(() =>
           notification.info({
             message: `Comment edited.`,
@@ -114,7 +131,9 @@ const App = () => {
 
   const handleDelete = async (id) => {
     await axios
-      .delete(`${BACKEND_BASE_URL}/chat/deleteCommentById/${id}`)
+      .delete(`${BACKEND_BASE_URL}/chat/deleteCommentById/${id}`, {
+        headers: { Authorization: localStorage.getItem("authToken") },
+      })
       .then(() =>
         notification.info({
           message: `Comment deleted.`,

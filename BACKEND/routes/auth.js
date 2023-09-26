@@ -12,26 +12,27 @@ const {
   deleteById,
   notifyUser,
 } = require("../controllers/auth");
+const { eventMiddleware } = require("../utils/eventMiddleware");
 
 //bellow routes map the controllers
-router.route("/register").post(register); // call the auth in controllers
+router.route("/register").post(eventMiddleware, register); // call the auth in controllers
 
-router.route("/login").post(login);
+router.route("/login").post(eventMiddleware, login);
 
-router.route("/forgotpassword").post(forgotpassword);
+router.route("/forgotpassword").post(eventMiddleware, forgotpassword);
 
-router.route("/notifyuser").post(notifyUser);
+router.route("/notifyuser").post(eventMiddleware, notifyUser);
 
-router.route("/passwordreset/:resetToken").put(resetpassword);
+router.route("/passwordreset/:resetToken").put(eventMiddleware, resetpassword);
 
-router.route("/registerStaff").post(registerStaff);
+router.route("/registerStaff").post(eventMiddleware, registerStaff);
 
-router.route("/").get(get);
+router.route("/").get(eventMiddleware, get);
 
-router.route("/get/:id").get(getById);
+router.route("/get/:id").get(eventMiddleware, getById);
 
-router.route("/update/:id").put(updateById);
+router.route("/update/:id").put(eventMiddleware, updateById);
 
-router.route("/delete/:id").delete(deleteById);
+router.route("/delete/:id").delete(eventMiddleware, deleteById);
 
 module.exports = router;

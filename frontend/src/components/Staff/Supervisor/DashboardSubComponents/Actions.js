@@ -36,15 +36,25 @@ const Actions = () => {
 
   useEffect(() => {
     (async () =>
-      await axios.get(`${BACKEND_BASE_URL}/document-upload`).then((res) => {
-        setData(res?.data.filter((res) => res?.evaluation === "NOT EVALUATED"));
-        setLoading(false);
-      }))();
+      await axios
+        .get(`${BACKEND_BASE_URL}/document-upload`, {
+          headers: { Authorization: localStorage.getItem("authToken") },
+        })
+        .then((res) => {
+          setData(
+            res?.data.filter((res) => res?.evaluation === "NOT EVALUATED")
+          );
+          setLoading(false);
+        }))();
     (async () =>
-      await axios.get(`${BACKEND_BASE_URL}/mark-scheme/`).then((res) => {
-        setScheme(res?.data);
-        setLoading(false);
-      }))();
+      await axios
+        .get(`${BACKEND_BASE_URL}/mark-scheme/`, {
+          headers: { Authorization: localStorage.getItem("authToken") },
+        })
+        .then((res) => {
+          setScheme(res?.data);
+          setLoading(false);
+        }))();
   }, [search, evaluate]);
 
   const genExtra = (value) => <span className="status">{value}</span>;
@@ -93,7 +103,10 @@ const Actions = () => {
       );
     await axios.put(
       `${BACKEND_BASE_URL}/document-upload/update/${value?._id}`,
-      { evaluation: "EVALUATED" }
+      { evaluation: "EVALUATED" },
+      {
+        headers: { Authorization: localStorage.getItem("authToken") },
+      }
     );
     await axios.post(
       `${BACKEND_BASE_URL}/evaluation-history/notifyStudentBySupervisor`,
@@ -102,6 +115,9 @@ const Actions = () => {
         comment,
         rate,
         submittedBy: value?.email,
+      },
+      {
+        headers: { Authorization: localStorage.getItem("authToken") },
       }
     );
     setEvaluate(true);
