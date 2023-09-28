@@ -5,7 +5,10 @@ const crypto = require("crypto");
 //when we use asynchronous function we need try catch block
 exports.register = async (req, res) => {
   //controller for register
-  const { username, email, password, type } = req.body; //destructur e method
+  const username = req.sanitize(req.body.username);
+  const email = req.sanitize(req.body.email);
+  const password = req.sanitize(req.body.password);
+  const type = req.sanitize(req.body.type);
 
   const isAvailable = await User.findOne({
     //check the availability of saving data
@@ -16,7 +19,7 @@ exports.register = async (req, res) => {
     // if satisfied return proper error
     return res
       .status(401)
-      .json({ error: "Already Used This Email ! Plz use something new 😀" });
+      .json(JSON.stringify({ error: "Already Used This Email ! Plz use something new 😀" }));
   }
 
   try {
@@ -30,25 +33,26 @@ exports.register = async (req, res) => {
   } catch (error) {
     if (error.code === 11000) {
       const message = "Already have an account using this email ";
-      return res.status(400).json({ success: false, error: message });
+      return res.status(400).json(JSON.stringify({ success: false, error: message }));
     }
 
     if (error.name === "ValidationError") {
       const message = Object.values(error.errors).map((val) => val.message);
-      return res.status(400).json({ success: false, error: message });
+      return res.status(400).json(JSON.stringify({ success: false, error: message }));
     }
   }
 };
 
 exports.login = async (req, res) => {
   //controller for login
-  const { email, password } = req.body;
+  const email = req.sanitize(req.body.email);
+  const password = req.sanitize(req.body.password);
 
   if (!email && !password) {
     //backend validation
     return res
       .status(400)
-      .json({ success: false, error: "Please enter email and password" });
+      .json(JSON.stringify({ success: false, error: "Please enter email and password" }));
   } //400 Bad Request
 
   try {
@@ -58,10 +62,10 @@ exports.login = async (req, res) => {
 
     if (!user) {
       //true
-      return res.status(401).json({
+      return res.status(401).json(JSON.stringify({
         success: false,
         available: "User does not exists. Please create an account !",
-      });
+      }));
     }
 
     const isMatch = await user.matchPasswords(password); //matching the passwords from the received from request and from the db
@@ -69,22 +73,22 @@ exports.login = async (req, res) => {
     if (!isMatch) {
       return res
         .status(401)
-        .json({ success: false, error: "Invalid Credentials" });
+        .json(JSON.stringify({ success: false, error: "Invalid Credentials" }));
     }
 
     sendToken(user, 200, res);
   } catch (error) {
-    res.status(500).json({
+    res.status(500).json(JSON.stringify({
       // 500 internal server error
       success: false,
       error: error.message,
-    });
+    }));
   }
 };
 
 exports.forgotpassword = async (req, res) => {
   //controller for forgot password
-  const { email } = req.body;
+  const email = req.sanitize(req.body.email);
 
   try {
     const user = await User.findOne({ email }); //check for email availability for sending emails
@@ -92,7 +96,7 @@ exports.forgotpassword = async (req, res) => {
     if (!user) {
       return res
         .status(404)
-        .json({ success: false, error: "Email could not be sent" });
+        .json(JSON.stringify({ success: false, error: "Email could not be sent" }));
     }
 
     const resetToken = user.getResetPasswordToken(); // get the password reset token
@@ -118,7 +122,7 @@ exports.forgotpassword = async (req, res) => {
         text: message,
       });
 
-      res.status(200).json({ success: true, verify: "Email Sent" });
+      res.status(200).json(JSON.stringify({ success: true, verify: "Email Sent" }));
     } catch (error) {
       user.resetPasswordToken = undefined;
       user.resetPasswordExpire = undefined;
@@ -127,7 +131,7 @@ exports.forgotpassword = async (req, res) => {
 
       return res
         .status(500)
-        .json({ success: false, error: "Email could not be sent" });
+        .json(JSON.stringify({ success: false, error: "Email could not be sent" }));
     }
   } catch (error) {
     // next(error);
@@ -159,11 +163,11 @@ exports.resetpassword = async (req, res) => {
 
     await user.save();
 
-    res.status(200).json({ success: true, verify: "Password reset success" });
+    res.status(200).json(JSON.stringify({ success: true, verify: "Password reset success" }));
   } catch (error) {
     if (error.name === "ValidationError") {
       const message = Object.values(error.errors).map((val) => val.message);
-      return res.status(400).json({ success: false, error: message });
+      return res.status(400).json(JSON.stringify({ success: false, error: message }));
     }
   }
 };
@@ -171,7 +175,10 @@ exports.resetpassword = async (req, res) => {
 //when we use asynchronous function we need try catch block
 exports.registerStaff = async (req, res) => {
   //controller for register
-  const { username, email, password, type } = req.body; //destructur e method
+  const username = req.sanitize(req.body.username);
+  const email = req.sanitize(req.body.email);
+  const password = req.sanitize(req.body.password);
+  const type = req.sanitize(req.body.type);
 
   try {
     const user = await User.create({
@@ -184,53 +191,59 @@ exports.registerStaff = async (req, res) => {
   } catch (error) {
     if (error.code === 11000) {
       const message = "Already have an account using this email ";
-      return res.status(400).json({ success: false, error: message });
+      return res.status(400).json(JSON.stringify({ success: false, error: message }));
     }
 
     if (error.name === "ValidationError") {
       const message = Object.values(error.errors).map((val) => val.message);
-      return res.status(400).json({ success: false, error: message });
+      return res.status(400).json(JSON.stringify({ success: false, error: message }));
     }
   }
 };
 
 exports.get = async (req, res) => {
   await User.find()
-    .then((users) => res.json(users))
-    .catch((err) => res.status(500).json({ err }));
+    .then((users) => res.json(JSON.stringify(users)))
+    .catch((err) => res.status(500).json(JSON.stringify({ err })));
 };
 
 exports.getById = async (req, res) => {
-  const { id } = req.params;
+  const id = req.sanitize(req.params.id);
   await User.findById(id)
-    .then((user) => res.json(user))
-    .catch((err) => res.status(500).json({ err }));
+    .then((user) => res.json(JSON.stringify(user)))
+    .catch((err) => res.status(500).json(JSON.stringify({ err })));
 };
 
 exports.updateById = async (req, res) => {
-  const { id } = req.params;
+  const id = req.sanitize(req.params.id);
+  const username = req.sanitize(req.body.username);
+  const email = req.sanitize(req.body.email);
+  const type = req.sanitize(req.body.type);
 
-  const { email, username, type } = req.body;
+  
 
   await User.findByIdAndUpdate(id, {
     email,
     username,
     type,
   })
-    .then(() => res.json({ message: "Successfully Update the Employee" }))
-    .catch((err) => res.status(500).json({ err }));
+    .then(() => res.json(JSON.stringify({ message: "Successfully Update the Employee" })))
+    .catch((err) => res.status(500).json(JSON.stringify({ err })));
 };
 
 exports.deleteById = async (req, res) => {
-  const { id } = req.params;
+  const id = req.sanitize(req.params.id);
 
   await User.findByIdAndDelete(id)
-    .then(() => res.json({ success: true }))
-    .catch((err) => res.status(500).json({ success: false, err }));
+    .then(() => res.json(JSON.stringify({ success: true })))
+    .catch((err) => res.status(500).json(JSON.stringify({ success: false, err })));
 };
 
 exports.notifyUser = async (req, res) => {
-  const { username, email, password, type } = req.body;
+  const username = req.sanitize(req.body.username);
+  const email = req.sanitize(req.body.email);
+  const password = req.sanitize(req.body.password);
+  const type = req.sanitize(req.body.type);
 
   const message = `
         <center>
@@ -260,11 +273,11 @@ exports.notifyUser = async (req, res) => {
 
     res
       .status(200)
-      .json({ success: true, verify: "Email is sent to the user" });
+      .json(JSON.stringify({ success: true, verify: "Email is sent to the user" }));
   } catch (error) {
     return res
       .status(500)
-      .json({ success: false, error: "Email could not be sent" });
+      .json(JSON.stringify({ success: false, error: "Email could not be sent" }));
   }
 };
 
@@ -275,12 +288,12 @@ const sendToken = (user, statusCode, res) => {
   const email = user.email;
   const type = user.type;
   const dept = user.dept;
-  res.status(200).json({
+  res.status(200).json(JSON.stringify({
     success: true,
     token,
     username,
     email,
     type,
     dept,
-  });
+  }));
 };
