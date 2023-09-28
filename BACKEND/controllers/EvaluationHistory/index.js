@@ -1,5 +1,6 @@
 const EvaluationHistory = require("../../models/EvaluationHistory");
 const sendEmail = require("../../utils/sendEmail");
+const DOMPurify = require("isomorphic-dompurify");
 
 exports.createHistory = async (req, res) => {
     const status = req.sanitize(req.body.status);
@@ -22,14 +23,14 @@ exports.createHistory = async (req, res) => {
 
   await newEvaluationHistory
     .save()
-    .then(() => res.status(200).json(JSON.stringify({ success: true, message: "Created" })))
-    .catch((err) => res.status(500).json(JSON.stringify({ success: false, message: err })));
+    .then(() => res.status(200).json({ success: true, message: "Created" }))
+    .catch((err) => res.status(500).json({ success: false, message: DOMPurify.sanitize(err) }));
 };
 
 exports.getHistory = async (req, res) => {
   await EvaluationHistory.find()
-    .then((history) => res.status(200).json(JSON.stringify(history)))
-    .catch((err) => res.status(500).json(JSON.stringify({ success: false, message: err })));
+    .then((history) => res.status(200).json(history))
+    .catch((err) => res.status(500).json({ success: false, message: DOMPurify.sanitize(err) }));
 };
 
 exports.notifyStudentBySupervisor = async (req, res) => {
@@ -59,10 +60,10 @@ exports.notifyStudentBySupervisor = async (req, res) => {
 
     return res
       .status(200)
-      .json(JSON.stringify({ success: true, verify: "Email is sent to the user" }));
+      .json({ success: true, verify: "Email is sent to the user" });
   } catch (error) {
     return res
       .status(500)
-      .json(JSON.stringify({ success: false, error: "Email could not be sent" }));
+      .json({ success: false, error: "Email could not be sent" });
   }
 };

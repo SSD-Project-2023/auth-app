@@ -1,6 +1,8 @@
 const User = require("../models/auth");
 const sendEmail = require("../utils/sendEmail");
 const crypto = require("crypto");
+const DOMPurify = require("isomorphic-dompurify");
+DOMPurify.sanitize
 
 //when we use asynchronous function we need try catch block
 exports.register = async (req, res) => {
@@ -19,7 +21,7 @@ exports.register = async (req, res) => {
     // if satisfied return proper error
     return res
       .status(401)
-      .json(JSON.stringify({ error: "Already Used This Email ! Plz use something new 😀" }));
+      .json({ error: "Already Used This Email ! Plz use something new 😀" });
   }
 
   try {
@@ -33,12 +35,16 @@ exports.register = async (req, res) => {
   } catch (error) {
     if (error.code === 11000) {
       const message = "Already have an account using this email ";
-      return res.status(400).json(JSON.stringify({ success: false, error: message }));
+      return res
+        .status(400)
+        .json({ success: false, error: DOMPurify.sanitize(message) });
     }
 
     if (error.name === "ValidationError") {
       const message = Object.values(error.errors).map((val) => val.message);
-      return res.status(400).json(JSON.stringify({ success: false, error: message }));
+      return res
+        .status(400)
+        .json({ success: false, error: DOMPurify.sanitize(message) });
     }
   }
 };
@@ -52,7 +58,7 @@ exports.login = async (req, res) => {
     //backend validation
     return res
       .status(400)
-      .json(JSON.stringify({ success: false, error: "Please enter email and password" }));
+      .json({ success: false, error: "Please enter email and password" });
   } //400 Bad Request
 
   try {
@@ -62,10 +68,10 @@ exports.login = async (req, res) => {
 
     if (!user) {
       //true
-      return res.status(401).json(JSON.stringify({
+      return res.status(401).json({
         success: false,
         available: "User does not exists. Please create an account !",
-      }));
+      });
     }
 
     const isMatch = await user.matchPasswords(password); //matching the passwords from the received from request and from the db
@@ -73,16 +79,16 @@ exports.login = async (req, res) => {
     if (!isMatch) {
       return res
         .status(401)
-        .json(JSON.stringify({ success: false, error: "Invalid Credentials" }));
+        .json({ success: false, error: "Invalid Credentials" });
     }
 
     sendToken(user, 200, res);
   } catch (error) {
-    res.status(500).json(JSON.stringify({
+    res.status(500).json({
       // 500 internal server error
       success: false,
-      error: error.message,
-    }));
+      error: DOMPurify.sanitize(error.message),
+    });
   }
 };
 
@@ -96,7 +102,7 @@ exports.forgotpassword = async (req, res) => {
     if (!user) {
       return res
         .status(404)
-        .json(JSON.stringify({ success: false, error: "Email could not be sent" }));
+        .json({ success: false, error: "Email could not be sent" });
     }
 
     const resetToken = user.getResetPasswordToken(); // get the password reset token
@@ -122,7 +128,7 @@ exports.forgotpassword = async (req, res) => {
         text: message,
       });
 
-      res.status(200).json(JSON.stringify({ success: true, verify: "Email Sent" }));
+      res.status(200).json({ success: true, verify: "Email Sent" });
     } catch (error) {
       user.resetPasswordToken = undefined;
       user.resetPasswordExpire = undefined;
@@ -131,7 +137,7 @@ exports.forgotpassword = async (req, res) => {
 
       return res
         .status(500)
-        .json(JSON.stringify({ success: false, error: "Email could not be sent" }));
+        .json({ success: false, error: "Email could not be sent" });
     }
   } catch (error) {
     // next(error);
@@ -163,11 +169,13 @@ exports.resetpassword = async (req, res) => {
 
     await user.save();
 
-    res.status(200).json(JSON.stringify({ success: true, verify: "Password reset success" }));
+    res.status(200).json({ success: true, verify: "Password reset success" });
   } catch (error) {
     if (error.name === "ValidationError") {
       const message = Object.values(error.errors).map((val) => val.message);
-      return res.status(400).json(JSON.stringify({ success: false, error: message }));
+      return res
+        .status(400)
+        .json({ success: false, error: DOMPurify.sanitize(message) });
     }
   }
 };
@@ -191,27 +199,31 @@ exports.registerStaff = async (req, res) => {
   } catch (error) {
     if (error.code === 11000) {
       const message = "Already have an account using this email ";
-      return res.status(400).json(JSON.stringify({ success: false, error: message }));
+      return res
+        .status(400)
+        .json({ success: false, error: DOMPurify.sanitize(message) });
     }
 
     if (error.name === "ValidationError") {
       const message = Object.values(error.errors).map((val) => val.message);
-      return res.status(400).json(JSON.stringify({ success: false, error: message }));
+      return res
+        .status(400)
+        .json({ success: false, error: DOMPurify.sanitize(message) });
     }
   }
 };
 
 exports.get = async (req, res) => {
   await User.find()
-    .then((users) => res.json(JSON.stringify(users)))
-    .catch((err) => res.status(500).json(JSON.stringify({ err })));
+    .then((users) => res.json(DOMPurify.sanitize(users)))
+    .catch((err) => res.status(500).json({ err: DOMPurify.sanitize(err) }));
 };
 
 exports.getById = async (req, res) => {
   const id = req.sanitize(req.params.id);
   await User.findById(id)
-    .then((user) => res.json(JSON.stringify(user)))
-    .catch((err) => res.status(500).json(JSON.stringify({ err })));
+    .then((user) => res.json(DOMPurify.sanitize(user)))
+    .catch((err) => res.status(500).json({ err: DOMPurify.sanitize(err) }));
 };
 
 exports.updateById = async (req, res) => {
@@ -227,16 +239,18 @@ exports.updateById = async (req, res) => {
     username,
     type,
   })
-    .then(() => res.json(JSON.stringify({ message: "Successfully Update the Employee" })))
-    .catch((err) => res.status(500).json(JSON.stringify({ err })));
+    .then(() => res.json({ message: "Successfully Update the Employee" }))
+    .catch((err) => res.status(500).json({ err: DOMPurify.sanitize(err) }));
 };
 
 exports.deleteById = async (req, res) => {
   const id = req.sanitize(req.params.id);
 
   await User.findByIdAndDelete(id)
-    .then(() => res.json(JSON.stringify({ success: true })))
-    .catch((err) => res.status(500).json(JSON.stringify({ success: false, err })));
+    .then(() => res.json({ success: true }))
+    .catch((err) =>
+      res.status(500).json({ success: false, err: DOMPurify.sanitize(err) })
+    );
 };
 
 exports.notifyUser = async (req, res) => {
@@ -273,11 +287,11 @@ exports.notifyUser = async (req, res) => {
 
     res
       .status(200)
-      .json(JSON.stringify({ success: true, verify: "Email is sent to the user" }));
+      .json({ success: true, verify: "Email is sent to the user" });
   } catch (error) {
     return res
       .status(500)
-      .json(JSON.stringify({ success: false, error: "Email could not be sent" }));
+      .json({ success: false, error: "Email could not be sent" });
   }
 };
 
@@ -288,12 +302,12 @@ const sendToken = (user, statusCode, res) => {
   const email = user.email;
   const type = user.type;
   const dept = user.dept;
-  res.status(200).json(JSON.stringify({
+  res.status(200).json({
     success: true,
     token,
     username,
     email,
     type,
     dept,
-  }));
+  });
 };

@@ -1,4 +1,5 @@
 const StudentGroup = require("../../models/StudentGroups");
+const DOMPurify = require("isomorphic-dompurify");
 
 //controller for registering Student Groups
 //Get data from the user.
@@ -37,23 +38,27 @@ exports.createStudentGroup = async (req, res) => {
 
   if (isAvailable) {
     // if satisfied return proper error
-    return res.status(401).json(JSON.stringify({
+    return res.status(401).json({
       error:
         "Group name is already taken or Some members are already in a group",
-    }));
+    });
   }
 
   await newStudentGroup
     .save()
-    .then(() => res.status(200).json(JSON.stringify({ success: true })))
-    .catch((error) => res.status(500).json(JSON.stringify({ success: false, error: error }))); // else save to the db
+    .then(() => res.status(200).json({ success: true }))
+    .catch((error) =>
+      res.status(500).json({ success: false, error: DOMPurify.sanitize(error) })
+    ); // else save to the db
 };
 
 //controller for getting Student Groups
 exports.getStudentGroups = async (req, res) => {
   await StudentGroup.find()
-    .then((groups) => res.json(JSON.stringify(groups)))
-    .catch((error) => res.status(500).json(JSON.stringify({ success: false, error: error })));
+    .then((groups) => res.json(DOMPurify.sanitize(groups)))
+    .catch((error) =>
+      res.status(500).json({ success: false, error: DOMPurify.sanitize(error) })
+    );
 };
 
 //controller for getting Student Group by Student Email
@@ -61,8 +66,10 @@ exports.getStudentGroup = async (req, res) => {
   const GroupName = req.params.id;
 
   await StudentGroup.findOne({ group_name: GroupName }) //find by the document by id
-    .then((StudentGroup) => res.json(JSON.stringify(StudentGroup)))
-    .catch((error) => res.status(500).json(JSON.stringify({ success: false, error: error })));
+    .then((StudentGroup) => res.json(DOMPurify.sanitize(StudentGroup)))
+    .catch((error) =>
+      res.status(500).json({ success: false, error: DOMPurify.sanitize(error) })
+    );
 };
 
 //controller for updating Student Group details by id
@@ -91,8 +98,10 @@ exports.updateStudentGroup = async (req, res) => {
     member4_Email,
     member4_Name,
   }) //find the document by and update the relavant data
-    .then(() => res.json(JSON.stringify({ success: true })))
-    .catch((error) => res.json(JSON.stringify({ success: false, Error: error })));
+    .then(() => res.json({ success: true }))
+    .catch((error) =>
+      res.json({ success: false, Error: DOMPurify.sanitize(error) })
+    );
 };
 
 //controller for deleting Student Group by id
@@ -100,6 +109,8 @@ exports.deleteStudentGroup = async (req, res) => {
   const GroupName = req.params.id;
 
   await StudentGroup.findOneAndRemove({ group_name: GroupName }) //find by the document by id and delete
-    .then(() => res.json(JSON.stringify({ message: "Successfully Deleted" })))
-    .catch((error) => res.status(500).json(JSON.stringify({ success: false, error: error })));
+    .then(() => res.json({ message: "Successfully Deleted" }))
+    .catch((error) =>
+      res.status(500).json({ success: false, error: DOMPurify.sanitize(error) })
+    );
 };
