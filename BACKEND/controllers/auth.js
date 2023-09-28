@@ -215,14 +215,14 @@ exports.registerStaff = async (req, res) => {
 
 exports.get = async (req, res) => {
   await User.find()
-    .then((users) => res.json(DOMPurify.sanitize(users)))
+    .then((users) => res.json(users))
     .catch((err) => res.status(500).json({ err: DOMPurify.sanitize(err) }));
 };
 
 exports.getById = async (req, res) => {
   const id = req.sanitize(req.params.id);
   await User.findById(id)
-    .then((user) => res.json(DOMPurify.sanitize(user)))
+    .then((user) => res.json(user))
     .catch((err) => res.status(500).json({ err: DOMPurify.sanitize(err) }));
 };
 
