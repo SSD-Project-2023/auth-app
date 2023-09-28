@@ -2,6 +2,7 @@ const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
 const dotenv = require("dotenv");
+const expressSanitizer = require('express-sanitizer');
 
 dotenv.config();
 
@@ -25,6 +26,7 @@ const PORT = process.env.PORT || 8070; //accually process.env.PORT is inbuilt
 
 app.use(cors());
 app.use(express.json()); //parse various different custom JSON types as JSO
+app.use(expressSanitizer()) //prevent XSS
 
 app.listen(PORT, () => {
   console.log(`Server is up and running on port number ${PORT}`);
