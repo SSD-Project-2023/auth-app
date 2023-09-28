@@ -4,18 +4,21 @@ const sendEmail = require("../../utils/sendEmail");
 //controller for registering topics
 exports.register = async (req, res) => {
   const {
-    topicName,
-    userEmail,
-    topicCat,
-    faculty,
-    date,
     lastModified = "NO MODIFICATION",
     status = "PENDING",
     acceptOrRejectBy = "NONE",
-    supervisorName,
     attachment = "https://drive.google.com/file/d/120D8ZvQs9R97wiXo8JZesq13vb6ctFsK/preview",
   } = req.body;
-  const members = Number(req.body.members);
+
+  const topicName = req.sanitize(req.body.topicName);
+  const userEmail = req.sanitize(req.body.userEmail);
+  const topicCat = req.sanitize(req.body.topicCat);
+  const faculty = req.sanitize(req.body.faculty);
+  const date = req.sanitize(req.body.date);
+  const supervisorName = req.sanitize(req.body.supervisorName);
+  const members = req.sanitize(Number(req.body.members));
+
+  
 
   const newTopic = new Topic({
     topicName,
@@ -47,20 +50,20 @@ exports.register = async (req, res) => {
     // if satisfied return proper error
     return res
       .status(401)
-      .json({ error: "Already Planned ! Plz plan something new 😀" });
+      .json(JSON.stringify({ error: "Already Planned ! Plz plan something new 😀" }));
   }
 
   await newTopic
     .save()
-    .then(() => res.status(200).json({ success: true }))
-    .catch((error) => res.status(500).json({ success: false, error: error })); // else save to the db
+    .then(() => res.status(200).json(JSON.stringify({ success: true })))
+    .catch((error) => res.status(500).json(JSON.stringify({ success: false, error: error }))); // else save to the db
 };
 
 //controller for getting topics
 exports.getTopics = async (req, res) => {
   await Topic.find()
-    .then((getTopics) => res.json(getTopics))
-    .catch((error) => res.status(500).json({ success: false, error: error }));
+    .then((getTopics) => res.json(JSON.stringify(getTopics)))
+    .catch((error) => res.status(500).json(JSON.stringify({ success: false, error: error })));
 };
 
 //controller for getting topic by id
@@ -68,12 +71,15 @@ exports.getTopic = async (req, res) => {
   const { id } = req.params;
 
   await Topic.findById(id) //find by the document by id
-    .then((topic) => res.json(topic))
-    .catch((error) => res.status(500).json({ success: false, error: error }));
+    .then((topic) => res.json(JSON.stringify(topic)))
+    .catch((error) => res.status(500).json(JSON.stringify({ success: false, error: error })));
 };
 
 exports.checkTopic = async (req, res) => {
-  const { m1, m2, m3, m4 } = req.params;
+  const m1 = req.sanitize(req.params.m1);
+  const m2 = req.sanitize(req.params.m2);
+  const m3 = req.sanitize(req.params.m3);
+  const m4 = req.sanitize(req.params.m4);
 
   const result =
     (await Topic.findOne({ userEmail: m1 })) ||
@@ -87,16 +93,18 @@ exports.checkTopic = async (req, res) => {
 //controller for updating topic by id
 exports.updateTopic = async (req, res) => {
   //backend route for updating relavant data and passing back
-  const { id } = req.params;
+  const id = req.sanitize(req.params.id);
   const {
-    topicName,
-    userEmail,
-    topicCat,
-    faculty,
-    date,
     attachment = "https://drive.google.com/file/d/120D8ZvQs9R97wiXo8JZesq13vb6ctFsK/preview",
   } = req.body;
-  const members = Number(req.body.members);
+
+  const topicName = req.sanitize(req.body.topicName);
+  const userEmail = req.sanitize(req.body.userEmail);
+  const topicCat = req.sanitize(req.body.topicCat);
+  const faculty = req.sanitize(req.body.faculty);
+  const date = req.sanitize(req.body.date);
+  const members = req.sanitize(Number(req.body.members));
+
 
   await Topic.findByIdAndUpdate(id, {
     topicName,
@@ -107,8 +115,8 @@ exports.updateTopic = async (req, res) => {
     members,
     attachment,
   }) //find the document by and update the relavant data
-    .then(() => res.json({ success: true }))
-    .catch((error) => res.json({ success: false, Error: error }));
+    .then(() => res.json(JSON.stringify({ success: true })))
+    .catch((error) => res.json(JSON.stringify({ success: false, Error: error })));
 };
 
 //controller for deleting topic by id
@@ -116,23 +124,28 @@ exports.deleteTopic = async (req, res) => {
   const { id } = req.params;
 
   await Topic.findByIdAndDelete(id) //find by the document by id and delete
-    .then(() => res.json({ message: "Successfully Deleted" }))
-    .catch((error) => res.status(500).json({ success: false, error: error }));
+    .then(() => res.json(JSON.stringify({ message: "Successfully Deleted" })))
+    .catch((error) => res.status(500).json(JSON.stringify({ success: false, error: error })));
 };
 
 /* IT19003160 */
 
 exports.acceptOrReject = async (req, res) => {
-  const { id } = req.params;
-  const { status, lastModified, acceptOrRejectBy } = req.body;
+  const id = req.sanitize(req.params.id);
+
+  const status = req.sanitize(req.body.status);
+  const lastModified = req.sanitize(req.body.lastModified);
+  const acceptOrRejectBy = req.sanitize(req.body.acceptOrRejectBy);
+
+  
 
   await Topic.findByIdAndUpdate(id, {
     status,
     lastModified,
     acceptOrRejectBy,
   }) //find the document by and update the relavant data
-    .then(() => res.json({ success: true }))
-    .catch((error) => res.json({ success: false, Error: error }));
+    .then(() => res.json(JSON.stringify({ success: true })))
+    .catch((error) => res.json(JSON.stringify({ success: false, Error: error })));
 };
 
 exports.notifyStudentBySupervisor = async (req, res) => {
@@ -163,10 +176,10 @@ exports.notifyStudentBySupervisor = async (req, res) => {
 
     return res
       .status(200)
-      .json({ success: true, verify: "Email is sent to the user" });
+      .json(JSON.stringify({ success: true, verify: "Email is sent to the user" }));
   } catch (error) {
     return res
       .status(500)
-      .json({ success: false, error: "Email could not be sent" });
+      .json(JSON.stringify({ success: false, error: "Email could not be sent" }));
   }
 };

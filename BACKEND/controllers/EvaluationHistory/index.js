@@ -2,8 +2,13 @@ const EvaluationHistory = require("../../models/EvaluationHistory");
 const sendEmail = require("../../utils/sendEmail");
 
 exports.createHistory = async (req, res) => {
-  const { status, evaluatedBy, submittedBy, docName, date, comment, rate } =
-    req.body;
+    const status = req.sanitize(req.body.status);
+    const evaluatedBy = req.sanitize(req.body.evaluatedBy);
+    const submittedBy = req.sanitize(req.body.submittedBy);
+    const docName = req.sanitize(req.body.docName);
+    const date = req.sanitize(req.body.date);
+    const comment = req.sanitize(req.body.comment);
+    const rate = req.sanitize(req.body.rate);
 
   const newEvaluationHistory = new EvaluationHistory({
     status,
@@ -17,18 +22,21 @@ exports.createHistory = async (req, res) => {
 
   await newEvaluationHistory
     .save()
-    .then(() => res.status(200).json({ success: true, message: "Created" }))
-    .catch((err) => res.status(500).json({ success: false, message: err }));
+    .then(() => res.status(200).json(JSON.stringify({ success: true, message: "Created" })))
+    .catch((err) => res.status(500).json(JSON.stringify({ success: false, message: err })));
 };
 
 exports.getHistory = async (req, res) => {
   await EvaluationHistory.find()
-    .then((history) => res.status(200).json(history))
-    .catch((err) => res.status(500).json({ success: false, message: err }));
+    .then((history) => res.status(200).json(JSON.stringify(history)))
+    .catch((err) => res.status(500).json(JSON.stringify({ success: false, message: err })));
 };
 
 exports.notifyStudentBySupervisor = async (req, res) => {
-  const { supervisor, comment, rate, submittedBy } = req.body;
+  const supervisor = req.sanitize(req.body.supervisor);
+  const comment = req.sanitize(req.body.comment);
+  const rate = req.sanitize(req.body.rate);
+  const submittedBy = req.sanitize(req.body.submittedBy);
 
   const message = `
         <center>
@@ -51,10 +59,10 @@ exports.notifyStudentBySupervisor = async (req, res) => {
 
     return res
       .status(200)
-      .json({ success: true, verify: "Email is sent to the user" });
+      .json(JSON.stringify({ success: true, verify: "Email is sent to the user" }));
   } catch (error) {
     return res
       .status(500)
-      .json({ success: false, error: "Email could not be sent" });
+      .json(JSON.stringify({ success: false, error: "Email could not be sent" }));
   }
 };
