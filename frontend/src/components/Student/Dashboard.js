@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Layout, Menu, Breadcrumb, Button, Popover } from "antd";
+import { Layout, Menu, Breadcrumb, Button, Popover, Image } from "antd";
 import {
   LogoutOutlined,
   HomeOutlined,
@@ -297,6 +297,9 @@ const StudentDashboard = () => {
               ? "Dashboard"
               : groupName && `Chat With ${groupName}`}
           </h1>
+          <div style={{ width: "5%", float: "right", marginRight: "20px" }}>
+            <Image src={localStorage.getItem("picture")} />
+          </div>
         </Header>
         <Content style={{ margin: "0 16px" }}>
           <Breadcrumb style={{ margin: "16px 0" }}>

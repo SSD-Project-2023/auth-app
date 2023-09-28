@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Row, Col, Form, Input, Button, Layout, Divider, Spin } from "antd";
 import "./Login.scss";
 import Logo from "./assets/logo.png";
@@ -14,6 +14,7 @@ import axios from "axios";
 import "antd/dist/antd.css";
 import PasswordResetRequest from "../Register/PasswordResetRequest";
 import { BACKEND_BASE_URL } from "../constant";
+import { useGoogleLogin } from "@react-oauth/google";
 
 const { Header } = Layout;
 
@@ -24,6 +25,7 @@ const Login = () => {
   const [available, setAvailable] = useState("");
   const [loading, setLoading] = useState(false); //additional
   const [isError, setIsError] = useState(false);
+  const [googleUser, setGoogleUser] = useState([]);
 
   const history = useNavigate();
 
@@ -79,6 +81,37 @@ const Login = () => {
       }, 5000); //5s
     }
   };
+
+  const login = useGoogleLogin({
+    onSuccess: (codeResponse) => setGoogleUser(codeResponse),
+    onError: (error) => console.log("Login Failed:", error),
+  });
+
+  useEffect(() => {
+    if (Object.keys(googleUser)?.length) {
+      localStorage.setItem("authToken", googleUser.access_token);
+      localStorage.setItem("type", "Student");
+      axios
+        .get(
+          `https://www.googleapis.com/oauth2/v1/userinfo?access_token=${googleUser.access_token}`,
+          {
+            headers: {
+              Authorization: `Bearer ${googleUser.access_token}`,
+              Accept: "application/json",
+            },
+          }
+        )
+        .then(async (res) => {
+          await Promise.all([
+            localStorage.setItem("username", res.data.given_name),
+            localStorage.setItem("email", res.data.email),
+            localStorage.setItem("picture", res.data.picture),
+          ]);
+          history(`/v3/${"Student"}-dashboard/${res.data.given_name}`);
+        })
+        .catch((err) => console.log(err)).finally(() => setGoogleUser([]));
+    }
+  }, [Object.keys(googleUser)?.length]);
 
   return (
     <>
@@ -172,17 +205,32 @@ const Login = () => {
                         &nbsp;Authenticating...
                       </Button>
                     ) : (
-                      <Button
-                        label={"SUBMIT"}
-                        className="submit-btn"
-                        htmlType="submit"
-                        type={"primary"}
-                        icon={<LoginOutlined />}
-                        disabled={loading}
-                      >
-                        SUBMIT
-                      </Button>
+                      <>
+                        <Button
+                          label={"SUBMIT"}
+                          className="submit-btn"
+                          htmlType="submit"
+                          type={"primary"}
+                          icon={<LoginOutlined />}
+                          disabled={loading}
+                        >
+                          SUBMIT
+                        </Button>
+                        <br /> <br />
+                        OR <br />
+                      </>
                     )}
+                    <div className="google-btn" onClick={login}>
+                      <div className="google-icon-wrapper">
+                        <img
+                          className="google-icon"
+                          src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg"
+                        />
+                      </div>
+                      <p className="btn-text">
+                        <b>Sign in with Google</b>
+                      </p>
+                    </div>
                   </center>
                 </div>
               </Form>

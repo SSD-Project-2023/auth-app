@@ -9,10 +9,10 @@ const {
 } = require("../../controllers/StudentGroups");
 const { eventMiddleware } = require("../../utils/eventMiddleware");
 
-router.route("/create").post(eventMiddleware, createStudentGroup);
-router.route("/getGroups").get(eventMiddleware, getStudentGroups);
-router.route("/getGroup/:id").get(eventMiddleware, getStudentGroup);
-router.route("/updateGroup/:id").put(eventMiddleware, updateStudentGroup);
-router.route("/deleteGroup/:id").delete(eventMiddleware, deleteStudentGroup);
+router.route("/create").post(createStudentGroup);
+router.route("/getGroups").get(getStudentGroups);
+router.route("/getGroup/:id").get(getStudentGroup);
+router.route("/updateGroup/:id").put(updateStudentGroup);
+router.route("/deleteGroup/:id").delete(deleteStudentGroup);
 
 module.exports = router;
