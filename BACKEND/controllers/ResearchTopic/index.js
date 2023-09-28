@@ -1,5 +1,6 @@
 const Topic = require("../../models/ResearchTopic");
 const sendEmail = require("../../utils/sendEmail");
+const DOMPurify = require("isomorphic-dompurify");
 
 //controller for registering topics
 exports.register = async (req, res) => {
@@ -50,20 +51,24 @@ exports.register = async (req, res) => {
     // if satisfied return proper error
     return res
       .status(401)
-      .json(JSON.stringify({ error: "Already Planned ! Plz plan something new 😀" }));
+      .json({ error: "Already Planned ! Plz plan something new 😀" });
   }
 
   await newTopic
     .save()
-    .then(() => res.status(200).json(JSON.stringify({ success: true })))
-    .catch((error) => res.status(500).json(JSON.stringify({ success: false, error: error }))); // else save to the db
+    .then(() => res.status(200).json({ success: true }))
+    .catch((error) =>
+      res.status(500).json({ success: false, error: DOMPurify.sanitize(error) })
+    ); // else save to the db
 };
 
 //controller for getting topics
 exports.getTopics = async (req, res) => {
   await Topic.find()
-    .then((getTopics) => res.json(JSON.stringify(getTopics)))
-    .catch((error) => res.status(500).json(JSON.stringify({ success: false, error: error })));
+    .then((getTopics) => res.json(getTopics))
+    .catch((error) =>
+      res.status(500).json({ success: false, error: DOMPurify.sanitize(error) })
+    );
 };
 
 //controller for getting topic by id
@@ -71,8 +76,10 @@ exports.getTopic = async (req, res) => {
   const { id } = req.params;
 
   await Topic.findById(id) //find by the document by id
-    .then((topic) => res.json(JSON.stringify(topic)))
-    .catch((error) => res.status(500).json(JSON.stringify({ success: false, error: error })));
+    .then((topic) => res.json(topic))
+    .catch((error) =>
+      res.status(500).json({ success: false, error: DOMPurify.sanitize(error) })
+    );
 };
 
 exports.checkTopic = async (req, res) => {
@@ -87,7 +94,7 @@ exports.checkTopic = async (req, res) => {
     (await Topic.findOne({ userEmail: m3 })) ||
     (await Topic.findOne({ userEmail: m4 }));
 
-  return res.json(result);
+  return res.json(DOMPurify.sanitize(result));
 };
 
 //controller for updating topic by id
@@ -115,8 +122,10 @@ exports.updateTopic = async (req, res) => {
     members,
     attachment,
   }) //find the document by and update the relavant data
-    .then(() => res.json(JSON.stringify({ success: true })))
-    .catch((error) => res.json(JSON.stringify({ success: false, Error: error })));
+    .then(() => res.json({ success: true }))
+    .catch((error) =>
+      res.json({ success: false, Error: DOMPurify.sanitize(error) })
+    );
 };
 
 //controller for deleting topic by id
@@ -124,8 +133,10 @@ exports.deleteTopic = async (req, res) => {
   const { id } = req.params;
 
   await Topic.findByIdAndDelete(id) //find by the document by id and delete
-    .then(() => res.json(JSON.stringify({ message: "Successfully Deleted" })))
-    .catch((error) => res.status(500).json(JSON.stringify({ success: false, error: error })));
+    .then(() => res.json({ message: "Successfully Deleted" }))
+    .catch((error) =>
+      res.status(500).json({ success: false, error: DOMPurify.sanitize(error) })
+    );
 };
 
 /* IT19003160 */
@@ -144,8 +155,10 @@ exports.acceptOrReject = async (req, res) => {
     lastModified,
     acceptOrRejectBy,
   }) //find the document by and update the relavant data
-    .then(() => res.json(JSON.stringify({ success: true })))
-    .catch((error) => res.json(JSON.stringify({ success: false, Error: error })));
+    .then(() => res.json({ success: true }))
+    .catch((error) =>
+      res.json({ success: false, Error: DOMPurify.sanitize(error) })
+    );
 };
 
 exports.notifyStudentBySupervisor = async (req, res) => {
@@ -176,10 +189,10 @@ exports.notifyStudentBySupervisor = async (req, res) => {
 
     return res
       .status(200)
-      .json(JSON.stringify({ success: true, verify: "Email is sent to the user" }));
+      .json({ success: true, verify: "Email is sent to the user" });
   } catch (error) {
     return res
       .status(500)
-      .json(JSON.stringify({ success: false, error: "Email could not be sent" }));
+      .json({ success: false, error: "Email could not be sent" });
   }
 };
