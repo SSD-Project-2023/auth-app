@@ -28,7 +28,7 @@ const ViewUsers = () => {
           setLoading(true);
         });
     })();
-  });
+  }, []);
 
   const showModal = () => {
     setVisible(true);
