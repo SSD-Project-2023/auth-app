@@ -1,5 +1,13 @@
 import React, { useEffect, useState } from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import jwtDecode from "jwt-decode";
+import moment from "moment";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  useLocation,
+  useNavigate,
+} from "react-router-dom";
 import "./App.css";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -31,6 +39,8 @@ import PanalDashboard from "./components/Staff/PanelMember/Dashboard";
 const App = () => {
   // The back-to-top button is hidden at the beginning
   const [showButton, setShowButton] = useState(false);
+  const location = useLocation();
+  const navigate = useNavigate();
 
   useEffect(() => {
     window.addEventListener("scroll", () => {
@@ -42,6 +52,21 @@ const App = () => {
     });
   }, []);
 
+  useEffect(() => {
+    if (localStorage.getItem("token")) {
+      if (
+        moment().diff(
+          jwtDecode(localStorage.getItem("token")).exp,
+          "minutes"
+        ) >= 30
+      ) {
+        localStorage.clear();
+        navigate("/");
+      }
+    }
+    console.log("First");
+  }, [location]);
+
   // This function will scroll the window to the top
   const scrollToTop = () => {
     window.scrollTo({
@@ -52,196 +77,191 @@ const App = () => {
   return (
     <>
       <ToastContainer />
-      <Router>
-        <Routes>
-          <Route path="/" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-          <Route
-            path="/passwordreset/:resetToken"
-            element={<ResetPassword />}
-          />
-          <Route path="*" element={<PageNotFound />} />
+      <Routes>
+        <Route path="/" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+        <Route path="/passwordreset/:resetToken" element={<ResetPassword />} />
+        <Route path="*" element={<PageNotFound />} />
 
-          {/* Student Routes Goes Here */}
+        {/* Student Routes Goes Here */}
 
-          <Route
-            path="/v3/:student-dashboard/:username"
-            element={
-              <PrivateRoute>
-                <StudentDashboard />
-              </PrivateRoute>
-            }
-          />
+        <Route
+          path="/v3/:student-dashboard/:username"
+          element={
+            <PrivateRoute>
+              <StudentDashboard />
+            </PrivateRoute>
+          }
+        />
 
-          <Route
-            path="/v3/:student-dashboard/:username/student-group"
-            element={
-              <PrivateRoute>
-                <StudentDashboard />
-              </PrivateRoute>
-            }
-          />
+        <Route
+          path="/v3/:student-dashboard/:username/student-group"
+          element={
+            <PrivateRoute>
+              <StudentDashboard />
+            </PrivateRoute>
+          }
+        />
 
-          <Route
-            path="/v3/:type/:username/view-document"
-            element={
-              <PrivateRoute>
-                <StudentDashboard />
-              </PrivateRoute>
-            }
-          />
+        <Route
+          path="/v3/:type/:username/view-document"
+          element={
+            <PrivateRoute>
+              <StudentDashboard />
+            </PrivateRoute>
+          }
+        />
 
-          <Route
-            path="/v3/:type/:username/submit-document"
-            element={
-              <PrivateRoute>
-                <StudentDashboard />
-              </PrivateRoute>
-            }
-          />
+        <Route
+          path="/v3/:type/:username/submit-document"
+          element={
+            <PrivateRoute>
+              <StudentDashboard />
+            </PrivateRoute>
+          }
+        />
 
-          <Route
-            path="/v3/:type/:username/request-supervisor"
-            element={
-              <PrivateRoute>
-                <StudentDashboard />
-              </PrivateRoute>
-            }
-          />
+        <Route
+          path="/v3/:type/:username/request-supervisor"
+          element={
+            <PrivateRoute>
+              <StudentDashboard />
+            </PrivateRoute>
+          }
+        />
 
-          <Route
-            path="/v3/:type/:username/submit-presentation"
-            element={
-              <PrivateRoute>
-                <StudentDashboard />
-              </PrivateRoute>
-            }
-          />
+        <Route
+          path="/v3/:type/:username/submit-presentation"
+          element={
+            <PrivateRoute>
+              <StudentDashboard />
+            </PrivateRoute>
+          }
+        />
 
-          <Route
-            path="/v4/:panel-dashboard/:username"
-            element={
-              <PrivateRoute>
-                <PanalDashboard />
-              </PrivateRoute>
-            }
-          />
+        <Route
+          path="/v4/:panel-dashboard/:username"
+          element={
+            <PrivateRoute>
+              <PanalDashboard />
+            </PrivateRoute>
+          }
+        />
 
-          <Route
-            path="/v4/:type/:username/evaluate-presentation"
-            element={
-              <PrivateRoute>
-                <PanalDashboard />
-              </PrivateRoute>
-            }
-          />
+        <Route
+          path="/v4/:type/:username/evaluate-presentation"
+          element={
+            <PrivateRoute>
+              <PanalDashboard />
+            </PrivateRoute>
+          }
+        />
 
-          <Route
-            path="/v4/:type/:username/evaluate-presentation/feedback/:id"
-            element={
-              <PrivateRoute>
-                <PanalDashboard />
-              </PrivateRoute>
-            }
-          />
+        <Route
+          path="/v4/:type/:username/evaluate-presentation/feedback/:id"
+          element={
+            <PrivateRoute>
+              <PanalDashboard />
+            </PrivateRoute>
+          }
+        />
 
-          {/* Private Routes Goes Here */}
+        {/* Private Routes Goes Here */}
 
-          <Route
-            path="/staff-register"
-            element={
-              <PrivateRoute>
-                <StaffRegister />
-              </PrivateRoute>
-            }
-          />
+        <Route
+          path="/staff-register"
+          element={
+            <PrivateRoute>
+              <StaffRegister />
+            </PrivateRoute>
+          }
+        />
 
-          {/* Supervisor Routes Goes Here */}
-          <Route
-            path="/v1/:supervisorType/:username"
-            element={
-              <PrivateRoute>
-                <SupervisorDashboard />
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path="/v1/:supervisorType/:username/research-topics"
-            element={
-              <PrivateRoute>
-                <SupervisorDashboard />
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path="/v1/:supervisorType/:username/evaluate-documents"
-            element={
-              <PrivateRoute>
-                <SupervisorDashboard />
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path="/v1/:supervisorType/:username/chat"
-            element={
-              <PrivateRoute>
-                <SupervisorDashboard />
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path="/v1/:supervisorType/:username/chat/:groupName"
-            element={
-              <PrivateRoute>
-                <SupervisorDashboard />
-              </PrivateRoute>
-            }
-          />
+        {/* Supervisor Routes Goes Here */}
+        <Route
+          path="/v1/:supervisorType/:username"
+          element={
+            <PrivateRoute>
+              <SupervisorDashboard />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/v1/:supervisorType/:username/research-topics"
+          element={
+            <PrivateRoute>
+              <SupervisorDashboard />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/v1/:supervisorType/:username/evaluate-documents"
+          element={
+            <PrivateRoute>
+              <SupervisorDashboard />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/v1/:supervisorType/:username/chat"
+          element={
+            <PrivateRoute>
+              <SupervisorDashboard />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/v1/:supervisorType/:username/chat/:groupName"
+          element={
+            <PrivateRoute>
+              <SupervisorDashboard />
+            </PrivateRoute>
+          }
+        />
 
-          {/* Admin Routes Goes Here */}
-          <Route
-            path="/v2/admin-dashboard/:username/view"
-            element={
-              <PrivateRoute>
-                <AdminDashboard />
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path="/v2/admin-dashboard/:username/edit/:id"
-            element={
-              <PrivateRoute>
-                <AdminDashboard />
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path="/v2/admin-dashboard/:username"
-            element={
-              <PrivateRoute>
-                <AdminDashboard />
-              </PrivateRoute>
-            }
-          />
+        {/* Admin Routes Goes Here */}
+        <Route
+          path="/v2/admin-dashboard/:username/view"
+          element={
+            <PrivateRoute>
+              <AdminDashboard />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/v2/admin-dashboard/:username/edit/:id"
+          element={
+            <PrivateRoute>
+              <AdminDashboard />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/v2/admin-dashboard/:username"
+          element={
+            <PrivateRoute>
+              <AdminDashboard />
+            </PrivateRoute>
+          }
+        />
 
-          <Route
-            path="/v2/admin-dashboard/:username/createmarkingscheme"
-            element={
-              <PrivateRoute>
-                <AdminDashboard />
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path="/v2/admin-dashboard/:username/documents"
-            element={
-              <PrivateRoute>
-                <AdminDashboard />
-              </PrivateRoute>
-            }
-          />
-        </Routes>
-      </Router>
+        <Route
+          path="/v2/admin-dashboard/:username/createmarkingscheme"
+          element={
+            <PrivateRoute>
+              <AdminDashboard />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/v2/admin-dashboard/:username/documents"
+          element={
+            <PrivateRoute>
+              <AdminDashboard />
+            </PrivateRoute>
+          }
+        />
+      </Routes>
       <>
         {/* React Fragment */}
         {showButton && (

@@ -55,7 +55,7 @@ exports.createStudentGroup = async (req, res) => {
 //controller for getting Student Groups
 exports.getStudentGroups = async (req, res) => {
   await StudentGroup.find()
-    .then((groups) => res.json(DOMPurify.sanitize(groups)))
+    .then((groups) => res.json(groups))
     .catch((error) =>
       res.status(500).json({ success: false, error: DOMPurify.sanitize(error) })
     );

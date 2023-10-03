@@ -1,8 +1,8 @@
 const User = require("../models/auth");
+const Audit = require("../models/audit");
 const sendEmail = require("../utils/sendEmail");
 const crypto = require("crypto");
 const DOMPurify = require("isomorphic-dompurify");
-DOMPurify.sanitize
 
 //when we use asynchronous function we need try catch block
 exports.register = async (req, res) => {
@@ -55,6 +55,8 @@ exports.login = async (req, res) => {
   const password = req.sanitize(req.body.password);
 
   if (!email && !password) {
+    const audit = new Audit({email, createdAt: new Date(), status: "FAILED"});
+    await audit.save()
     //backend validation
     return res
       .status(400)
@@ -67,6 +69,8 @@ exports.login = async (req, res) => {
     }).select("+password"); //match two passwords
 
     if (!user) {
+      const audit = new Audit({email, createdAt: new Date(), status: "FAILED"});
+      await audit.save()
       //true
       return res.status(401).json({
         success: false,
@@ -77,11 +81,15 @@ exports.login = async (req, res) => {
     const isMatch = await user.matchPasswords(password); //matching the passwords from the received from request and from the db
 
     if (!isMatch) {
+      const audit = new Audit({email, createdAt: new Date(), status: "FAILED"});
+      await audit.save()
       return res
         .status(401)
         .json({ success: false, error: "Invalid Credentials" });
     }
 
+    const audit = new Audit({email, createdAt: new Date(), status: "PASSED"});
+    await audit.save()
     sendToken(user, 200, res);
   } catch (error) {
     res.status(500).json({
